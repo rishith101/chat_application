@@ -17,6 +17,11 @@ app.use(express.json());
 app.use(cors({origin:frontend_url,credentials:true}));
 app.use(clerkMiddleware());
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ ok: true });
+});
+
+
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
 
@@ -24,6 +29,7 @@ if (fs.existsSync(publicDir)) {
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 }
+
 app.listen(PORT,()=>{
     connectDB();
     console.log("running on port 3000")
