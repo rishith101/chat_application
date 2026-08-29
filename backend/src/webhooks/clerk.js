@@ -27,7 +27,7 @@ router.post("/",async (req,res) =>{
 
             await user.findOneAndUpdate({clerkId:u.id},
                 {clerkId:u.id,email,fullName,profilePic:u.image_url},
-                { new:true ,upsert:true ,setDefaultOnInsert:true},
+                { new:true ,upsert:true ,setDefaultsOnInsert:true},
             );
         }
 
