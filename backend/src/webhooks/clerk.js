@@ -1,7 +1,6 @@
 import express from "express";
 import user  from "./models/user";
 import {verifyWebhook } from "@clerk/backend/webhooks";
-import Message from "../models/message";
  
 //This creates a smaller router to organize routes: Then connect it to the main app:
 const router=express.Router()
