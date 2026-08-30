@@ -12,6 +12,9 @@ export const useChatStore = create((set, get) => ({
   isConversationsLoading: false,
   isMessagesLoading: false,
   isSending: false,
+  usersError: null,
+  conversationsError: null,
+  messagesError: null,
 
   setSelectedUser: (selectedUser) => {
     set({ selectedUser });
@@ -21,34 +24,51 @@ export const useChatStore = create((set, get) => ({
   },
 
   getUsers: async () => {
-    set({ isUsersLoading: true });
+    set({ isUsersLoading: true, usersError: null });
     try {
       let res;
       try {
         res = await axiosInstance.get("/messages/users");
-      } catch {
-        res = await axiosInstance.get("/auth/users");
+      } catch (err) {
+        if (err.response?.status === 404) {
+          res = await axiosInstance.get("/auth/users");
+        } else {
+          throw err;
+        }
       }
-      set({ users: Array.isArray(res.data) ? res.data : [] });
+      set({ users: Array.isArray(res.data) ? res.data : [], usersError: null });
     } catch (error) {
       console.warn("Could not fetch users from backend:", error?.message);
+      const errMsg =
+        error.response?.data?.message ||
+        `Backend endpoint error (${error.response?.status || "404 Not Found"})`;
+      set({ users: [], usersError: errMsg });
+      toast.error(`Users API error: ${errMsg}`);
     } finally {
       set({ isUsersLoading: false });
     }
   },
 
   getConversations: async () => {
-    set({ isConversationsLoading: true });
+    set({ isConversationsLoading: true, conversationsError: null });
     try {
       let res;
       try {
         res = await axiosInstance.get("/messages/conversations");
-      } catch {
-        res = await axiosInstance.get("/auth/conversations");
+      } catch (err) {
+        if (err.response?.status === 404) {
+          res = await axiosInstance.get("/auth/conversations");
+        } else {
+          throw err;
+        }
       }
-      set({ conversations: Array.isArray(res.data) ? res.data : [] });
+      set({ conversations: Array.isArray(res.data) ? res.data : [], conversationsError: null });
     } catch (error) {
       console.warn("Could not fetch conversations from backend:", error?.message);
+      const errMsg =
+        error.response?.data?.message ||
+        `Backend endpoint error (${error.response?.status || "404 Not Found"})`;
+      set({ conversations: [], conversationsError: errMsg });
     } finally {
       set({ isConversationsLoading: false });
     }
@@ -56,23 +76,27 @@ export const useChatStore = create((set, get) => ({
 
   getMessages: async (userId) => {
     if (!userId) return;
-    set({ isMessagesLoading: true });
+    set({ isMessagesLoading: true, messagesError: null });
     try {
       let res;
       try {
         res = await axiosInstance.get(`/messages/${userId}`);
-      } catch {
-        res = await axiosInstance.get(`/auth/${userId}`);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          res = await axiosInstance.get(`/auth/${userId}`);
+        } else {
+          throw err;
+        }
       }
       const fetchedMessages = Array.isArray(res.data) ? res.data : [];
-      // Backend returns newest first or oldest first. If newest first, reverse for chat chronology
       if (fetchedMessages.length > 1 && new Date(fetchedMessages[0].createdAt) > new Date(fetchedMessages[1].createdAt)) {
         fetchedMessages.reverse();
       }
-      set({ messages: fetchedMessages });
+      set({ messages: fetchedMessages, messagesError: null });
     } catch (error) {
       console.warn("Could not fetch messages:", error?.message);
-      set({ messages: [] });
+      const errMsg = error.response?.data?.message || "Failed to load messages";
+      set({ messages: [], messagesError: errMsg });
     } finally {
       set({ isMessagesLoading: false });
     }
@@ -103,11 +127,10 @@ export const useChatStore = create((set, get) => ({
 
       const sentMsg = res.data;
       set({ messages: [...messages, sentMsg] });
-      get().getConversations(); // refresh sidebar list
+      get().getConversations();
       return sentMsg;
     } catch (error) {
       const authUser = useAuthStore.getState().authUser;
-      // Optimistic message fallback if backend fails due to backend route issue
       const optimisticMsg = {
         _id: "opt_" + Date.now(),
         senderId: authUser?._id || authUser?.id || "my_id",
@@ -130,7 +153,6 @@ export const useChatStore = create((set, get) => ({
     socket.off("newMessage");
     socket.on("newMessage", (newMessage) => {
       const { selectedUser, messages } = get();
-      const authUser = useAuthStore.getState().authUser;
 
       const isForActiveChat =
         selectedUser &&

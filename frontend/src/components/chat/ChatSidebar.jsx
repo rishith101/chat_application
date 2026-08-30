@@ -11,6 +11,8 @@ import {
   Moon,
   Sun,
   LogOut,
+  AlertTriangle,
+  RotateCw,
 } from "lucide-react";
 import { formatMessageTime } from "../../lib/utils";
 
@@ -27,6 +29,8 @@ export default function ChatSidebar() {
     getConversations,
     isUsersLoading,
     isConversationsLoading,
+    usersError,
+    conversationsError,
   } = useChatStore();
 
   const { authUser, onlineUsers } = useAuthStore();
@@ -147,6 +151,11 @@ export default function ChatSidebar() {
         {activeTab === "chats" ? (
           isConversationsLoading ? (
             <SidebarSkeleton />
+          ) : conversationsError ? (
+            <ErrorSidebarState
+              message={conversationsError}
+              onRetry={getConversations}
+            />
           ) : filteredConversations.length === 0 ? (
             <EmptySidebarState
               icon={MessageSquare}
@@ -219,6 +228,8 @@ export default function ChatSidebar() {
           )
         ) : isUsersLoading ? (
           <SidebarSkeleton />
+        ) : usersError ? (
+          <ErrorSidebarState message={usersError} onRetry={getUsers} />
         ) : filteredUsers.length === 0 ? (
           <EmptySidebarState
             icon={Users}
@@ -300,6 +311,27 @@ function SidebarSkeleton() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function ErrorSidebarState({ message, onRetry }) {
+  return (
+    <div className="flex flex-col items-center justify-center p-6 text-center h-56 space-y-3">
+      <div className="p-3 rounded-full bg-destructive/10 text-destructive">
+        <AlertTriangle className="w-6 h-6" />
+      </div>
+      <h4 className="text-sm font-semibold text-foreground">Backend Request Failed</h4>
+      <p className="text-xs text-muted-foreground max-w-xs">{message}</p>
+      {onRetry && (
+        <button
+          onClick={onRetry}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition shadow-xs"
+        >
+          <RotateCw className="w-3.5 h-3.5" />
+          <span>Retry request</span>
+        </button>
+      )}
     </div>
   );
 }
