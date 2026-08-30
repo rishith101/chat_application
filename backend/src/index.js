@@ -7,8 +7,9 @@ import { clerkMiddleware } from '@clerk/express'
 import fs from "fs";
 import path from "path";
 import job from "./lib/cron.js";
-import clerkWebhook from "./webhooks/clerk.js"
-
+import clerkWebhook from "./webhooks/clerk.js";
+import authRoutes from "./routes/auth.js";
+import messageRoutes from "./routes/messageroutes.js"
 const app=express();
 const PORT=process.env.PORT ;
 const  frontend_url=process.env.FRONTEND_URL;
@@ -25,7 +26,15 @@ app.get("/health", (req, res) => {
   res.status(200).json({ ok: true });
 });
 
+app.get("/api/auth",authRoutes);
+app.get("/api/auth",messageRoutes); // any time we want to send messages or fetch messages this endpoint is called.
 
+
+ 
+
+//When deploying as a monolith, the same server handles both the frontend and backend.
+// The public folder contains the built frontend files, which Express sends to the user's browser.
+// The catch-all route ensures frontend pages like /dashboard work correctly.
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
 
