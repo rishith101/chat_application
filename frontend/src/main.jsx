@@ -5,20 +5,12 @@ import App from "./App.jsx";
 import { ClerkProvider } from "@clerk/react";
 import { BrowserRouter } from "react-router";
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
-      {PUBLISHABLE_KEY ? (
-        <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-          <App />
-        </ClerkProvider>
-      ) : (
-        <ClerkProvider>
-          <App />
-        </ClerkProvider>
-      )}
-    </BrowserRouter>
-  </StrictMode>
+    <ClerkProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ClerkProvider>
+  </StrictMode>,
 );

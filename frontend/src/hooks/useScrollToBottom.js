@@ -9,14 +9,11 @@ function useScrollToBottom(threadKey, lastItemId) {
 
   useEffect(() => {
     if (threadKey == null || threadKey === "") return;
-
     const el = scrollRef.current;
     if (!el) return;
-
     const scrollToBottom = () => {
       el.scrollTop = el.scrollHeight;
     };
-
     scrollToBottom();
     requestAnimationFrame(scrollToBottom);
   }, [threadKey, lastItemId]);
@@ -25,4 +22,3 @@ function useScrollToBottom(threadKey, lastItemId) {
 }
 
 export default useScrollToBottom;
-export { useScrollToBottom };

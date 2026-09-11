@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useSelectedConversation } from "../hooks/useSelectedConversation";
+import { useEffect } from "react";
 import ChatSidebar from "../components/chat/ChatSidebar";
 import { ChatHeader } from "../components/chat/ChatHeader";
 import { MessageList } from "../components/chat/MessageList";
@@ -26,38 +26,27 @@ function ChatPage() {
     getMessages(activeConversationId);
     subscribeToMessages(activeConversationId);
 
+    // cleanup
     return () => unsubscribeFromMessages();
   }, [getMessages, activeConversationId, subscribeToMessages, unsubscribeFromMessages]);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden p-2 sm:p-4 md:p-6 bg-background text-foreground relative">
-      {/* Subtle Background Lighting */}
-      <div className="absolute top-10 left-1/3 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10" />
-      <div className="absolute bottom-10 right-1/3 w-96 h-96 bg-accent/5 rounded-full blur-3xl -z-10" />
+    <div className="flex h-dvh flex-col overflow-hidden p-2 sm:p-3 md:p-8" style={frameStyle}>
+      <div className="mx-auto flex w-full max-w-6xl flex-1 overflow-hidden rounded-2xl border border-border bg-background text-foreground">
+        <ChatSidebar />
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1 overflow-hidden rounded-3xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-2xl">
-        {/* Left Sidebar Pane */}
         <div
-          className={`h-full ${
-            !isLargeScreen && activeConversationId ? "hidden" : "w-full lg:w-auto"
-          }`}
-        >
-          <ChatSidebar />
-        </div>
-
-        {/* Main Conversation Window Pane */}
-        <div
-          className={`flex-1 flex flex-col h-full overflow-hidden bg-card/20 ${
+          className={`flex-1 flex-col overflow-hidden ${
             !isLargeScreen && !activeConversationId ? "hidden lg:flex" : "flex"
           }`}
         >
           <ChatHeader />
           <MessageList />
-          {activeConversation && <ChatComposer />}
+
+          {activeConversation ? <ChatComposer /> : null}
         </div>
       </div>
     </div>
   );
 }
-
 export default ChatPage;
