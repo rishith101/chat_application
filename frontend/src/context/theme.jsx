@@ -8,12 +8,14 @@ function getSystemTheme() {
 }
 
 function readStoredTheme() {
+  if (typeof window === "undefined") return null;
   const theme = localStorage.getItem("theme");
   if (theme === "light" || theme === "dark") return theme;
   return null;
 }
 
 function applyDomTheme(theme) {
+  if (typeof window === "undefined") return;
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
   root.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
@@ -24,6 +26,7 @@ function isValidThemePreset(presetId) {
 }
 
 function applyThemePresetToDocument(presetId) {
+  if (typeof window === "undefined") return;
   const root = document.documentElement;
   if (presetId && presetId !== "default") {
     root.setAttribute("data-theme-preset", presetId);
@@ -33,6 +36,7 @@ function applyThemePresetToDocument(presetId) {
 }
 
 function readStoredThemePreset() {
+  if (typeof window === "undefined") return DEFAULT_THEME_PRESET_ID;
   const themePreset = localStorage.getItem("theme-preset");
   if (themePreset && isValidThemePreset(themePreset)) return themePreset;
   return DEFAULT_THEME_PRESET_ID;

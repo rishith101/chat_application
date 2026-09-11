@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { SignIn, SignUp } from "@clerk/react";
+import { ThemeControlToolbar } from "../components/ThemeControlToolbar";
 import { MessageSquare, Sparkles, ShieldCheck, Zap, Volume2 } from "lucide-react";
 
 export default function AuthPage() {
-  const [mode, setMode] = useState("signIn"); // "signIn" | "signUp"
+  const [mode, setMode] = useState("signIn");
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background text-foreground relative overflow-hidden">
@@ -11,7 +12,12 @@ export default function AuthPage() {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl -z-10 animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl -z-10" />
 
-      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 rounded-3xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-2xl overflow-hidden">
+      {/* Floating Theme Control Toolbar */}
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeControlToolbar compact={false} />
+      </div>
+
+      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 rounded-3xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-2xl overflow-hidden mt-12 sm:mt-0">
         {/* Left Hero Branding Banner */}
         <div className="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-primary/10 via-accent/5 to-background border-r border-border/30 relative">
           <div className="space-y-6">

@@ -6,15 +6,15 @@ function hasImageKitConfig(){
     return Boolean(process.env.IMAGE_PRIVATE_KIT);
 }
 
-function createFileName(orginalName="upload"){
-    const safeName=orginalName.replace(/[^a-zA-Z0-9._-]/g,"_");
-    return `char-${Date.now()}-${safeName}`;
+function createFileName(originalName="upload"){
+    const safeName=originalName.replace(/[^a-zA-Z0-9._-]/g,"_");
+    return `chat-${Date.now()}-${safeName}`;
 }
 
 async function uploadChatMedia(file) {
-    const fileName=createFileName(file.orginalname);
-    const result=await client.files.upload({
-        file:await toFile(file.Buffer,fileName,{type:file.mintype}),
+    const fileName=createFileName(file.originalname);
+    const result=await imagekit.files.upload({
+        file:await toFile(file.buffer,fileName,{type:file.mimetype}),
         fileName,
         folder:'/chat',
     });

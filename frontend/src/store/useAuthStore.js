@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { io } from "socket.io-client";
+import { useChatStore } from "./useChatStore";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : "/";
 
@@ -14,6 +15,8 @@ export const useAuthStore = create((set, get) => ({
     set({ authUser: user });
     if (user) {
       get().connectSocket(user);
+      useChatStore.getState().getUsers();
+      useChatStore.getState().getConversations();
     }
   },
 
@@ -24,6 +27,8 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.get("/auth/check");
       set({ authUser: res.data });
       get().connectSocket(res.data);
+      useChatStore.getState().getUsers();
+      useChatStore.getState().getConversations();
     } catch (error) {
       console.warn("Backend auth check endpoint error, using session user fallback:", error?.message);
       if (clerkUser) {
@@ -36,6 +41,8 @@ export const useAuthStore = create((set, get) => ({
         };
         set({ authUser: fallbackUser });
         get().connectSocket(fallbackUser);
+        useChatStore.getState().getUsers();
+        useChatStore.getState().getConversations();
       } else {
         set({ authUser: null });
       }

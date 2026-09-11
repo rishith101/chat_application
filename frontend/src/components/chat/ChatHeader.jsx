@@ -1,17 +1,11 @@
 import { useChatStore } from "../../store/useChatStore";
-import { useSoundStore } from "../../store/useSoundStore";
-import { useTheme } from "../../context/themecontext";
 import { useSelectedConversation } from "../../hooks/useSelectedConversation";
-import { HERO_UI_THEME_PRESETS } from "../../data/heroutheampresets";
-import { Volume2, VolumeX, ChevronLeft, Palette } from "lucide-react";
-import { useState } from "react";
+import { ThemeControlToolbar } from "../ThemeControlToolbar";
+import { ChevronLeft } from "lucide-react";
 
 export function ChatHeader() {
   const { setSelectedUser } = useChatStore();
-  const { soundEnabled, toggleSound } = useSoundStore();
-  const { themePreset, setThemePreset } = useTheme();
   const { activeConversation: peer } = useSelectedConversation();
-  const [showPresetsMenu, setShowPresetsMenu] = useState(false);
 
   if (!peer) return null;
 
@@ -65,58 +59,6 @@ export function ChatHeader() {
         </div>
       </div>
 
-      {/* Header Actions */}
-      <div className="flex items-center gap-1">
-        {/* Typing Sound Toggle */}
-        <button
-          onClick={toggleSound}
-          className={`p-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-medium ${
-            soundEnabled
-              ? "bg-primary/10 border-primary/20 text-primary"
-              : "bg-muted/30 border-border/40 text-muted-foreground hover:text-foreground"
-          }`}
-          title={soundEnabled ? "Typing sounds enabled" : "Typing sounds disabled"}
-        >
-          {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-          <span className="hidden sm:inline">{soundEnabled ? "Sounds On" : "Muted"}</span>
-        </button>
-
-        {/* Theme Palette Preset Menu */}
-        <div className="relative">
-          <button
-            onClick={() => setShowPresetsMenu((prev) => !prev)}
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition border border-transparent hover:border-border/40"
-            title="Theme Palette"
-          >
-            <Palette className="w-4 h-4" />
-          </button>
-
-          {showPresetsMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 p-2 rounded-2xl bg-card border border-border shadow-xl z-50 grid grid-cols-2 gap-1 animate-in fade-in zoom-in-95 duration-150">
-              {HERO_UI_THEME_PRESETS.map((preset) => (
-                <button
-                  key={preset.id}
-                  onClick={() => {
-                    setThemePreset(preset.id);
-                    setShowPresetsMenu(false);
-                  }}
-                  className={`flex items-center gap-2 p-1.5 rounded-lg text-xs font-medium text-left transition ${
-                    themePreset === preset.id
-                      ? "bg-accent/20 text-accent font-semibold"
-                      : "hover:bg-muted/40 text-foreground"
-                  }`}
-                >
-                  <span
-                    className="w-3.5 h-3.5 rounded-full flex-shrink-0 border border-black/10"
-                    style={{ background: preset.swatch }}
-                  />
-                  <span className="truncate">{preset.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
     </header>
   );
 }

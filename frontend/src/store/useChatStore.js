@@ -12,9 +12,6 @@ export const useChatStore = create((set, get) => ({
   isConversationsLoading: false,
   isMessagesLoading: false,
   isSending: false,
-  usersError: null,
-  conversationsError: null,
-  messagesError: null,
 
   setSelectedUser: (selectedUser) => {
     set({ selectedUser });
@@ -24,7 +21,7 @@ export const useChatStore = create((set, get) => ({
   },
 
   getUsers: async () => {
-    set({ isUsersLoading: true, usersError: null });
+    set({ isUsersLoading: true });
     try {
       let res;
       try {
@@ -36,21 +33,17 @@ export const useChatStore = create((set, get) => ({
           throw err;
         }
       }
-      set({ users: Array.isArray(res.data) ? res.data : [], usersError: null });
+      set({ users: Array.isArray(res.data) ? res.data : [] });
     } catch (error) {
-      console.warn("Could not fetch users from backend:", error?.message);
-      const errMsg =
-        error.response?.data?.message ||
-        `Backend endpoint error (${error.response?.status || "404 Not Found"})`;
-      set({ users: [], usersError: errMsg });
-      toast.error(`Users API error: ${errMsg}`);
+      console.warn("Could not fetch users from backend API endpoint:", error?.message);
+      set({ users: [] });
     } finally {
       set({ isUsersLoading: false });
     }
   },
 
   getConversations: async () => {
-    set({ isConversationsLoading: true, conversationsError: null });
+    set({ isConversationsLoading: true });
     try {
       let res;
       try {
@@ -62,13 +55,10 @@ export const useChatStore = create((set, get) => ({
           throw err;
         }
       }
-      set({ conversations: Array.isArray(res.data) ? res.data : [], conversationsError: null });
+      set({ conversations: Array.isArray(res.data) ? res.data : [] });
     } catch (error) {
-      console.warn("Could not fetch conversations from backend:", error?.message);
-      const errMsg =
-        error.response?.data?.message ||
-        `Backend endpoint error (${error.response?.status || "404 Not Found"})`;
-      set({ conversations: [], conversationsError: errMsg });
+      console.warn("Could not fetch conversations from backend API endpoint:", error?.message);
+      set({ conversations: [] });
     } finally {
       set({ isConversationsLoading: false });
     }
@@ -76,7 +66,7 @@ export const useChatStore = create((set, get) => ({
 
   getMessages: async (userId) => {
     if (!userId) return;
-    set({ isMessagesLoading: true, messagesError: null });
+    set({ isMessagesLoading: true });
     try {
       let res;
       try {
@@ -92,11 +82,10 @@ export const useChatStore = create((set, get) => ({
       if (fetchedMessages.length > 1 && new Date(fetchedMessages[0].createdAt) > new Date(fetchedMessages[1].createdAt)) {
         fetchedMessages.reverse();
       }
-      set({ messages: fetchedMessages, messagesError: null });
+      set({ messages: fetchedMessages });
     } catch (error) {
       console.warn("Could not fetch messages:", error?.message);
-      const errMsg = error.response?.data?.message || "Failed to load messages";
-      set({ messages: [], messagesError: errMsg });
+      set({ messages: [] });
     } finally {
       set({ isMessagesLoading: false });
     }
@@ -162,7 +151,12 @@ export const useChatStore = create((set, get) => ({
           newMessage.receiverId === selectedUser.id);
 
       if (isForActiveChat) {
-        set({ messages: [...messages, newMessage] });
+        const isDuplicate = messages.some(
+          (m) => m._id === newMessage._id || m.id === newMessage._id
+        );
+        if (!isDuplicate) {
+          set({ messages: [...messages, newMessage] });
+        }
       }
       get().getConversations();
     });

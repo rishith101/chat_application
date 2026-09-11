@@ -1,18 +1,14 @@
 import { useState, useEffect } from "react";
 import { useChatStore } from "../../store/useChatStore";
 import { useAuthStore } from "../../store/useAuthStore";
-import { useTheme } from "../../context/themecontext";
 import { mapUserToConversation } from "../../hooks/useSelectedConversation";
+import { ThemeControlToolbar } from "../ThemeControlToolbar";
 import { useClerk, UserButton } from "@clerk/react";
 import {
   MessageSquare,
   Users,
   Search,
-  Moon,
-  Sun,
   LogOut,
-  AlertTriangle,
-  RotateCw,
 } from "lucide-react";
 import { formatMessageTime } from "../../lib/utils";
 
@@ -29,18 +25,17 @@ export default function ChatSidebar() {
     getConversations,
     isUsersLoading,
     isConversationsLoading,
-    usersError,
-    conversationsError,
   } = useChatStore();
 
   const { authUser, onlineUsers } = useAuthStore();
-  const { theme, toggleTheme } = useTheme();
   const { signOut } = useClerk();
 
   useEffect(() => {
-    getUsers();
-    getConversations();
-  }, [getUsers, getConversations]);
+    if (authUser) {
+      getUsers();
+      getConversations();
+    }
+  }, [getUsers, getConversations, authUser]);
 
   const mappedConversations = conversations.map((u) => mapUserToConversation(u, onlineUsers));
   const mappedUsers = users.map((u) => mapUserToConversation(u, onlineUsers));
@@ -56,9 +51,9 @@ export default function ChatSidebar() {
   return (
     <aside className="w-full lg:w-80 xl:w-96 flex flex-col h-full border-r border-border/50 bg-card/40 backdrop-blur-md">
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-border/40 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="relative">
+      <div className="p-3 border-b border-border/40 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="relative flex-shrink-0">
             <UserButton afterSignOutUrl="/auth" />
             <span
               className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-background"
@@ -66,26 +61,26 @@ export default function ChatSidebar() {
             />
           </div>
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold truncate text-foreground">
+            <h2 className="text-xs font-bold truncate text-foreground">
               {authUser?.fullName || "Messages"}
             </h2>
-            <p className="text-xs text-muted-foreground truncate">
-              {onlineUsers.length} online
-            </p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {onlineUsers.length} online
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-xl hover:bg-accent/10 hover:text-foreground transition"
-            title="Toggle theme"
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
+        <div className="flex items-center gap-1.5">
+          <ThemeControlToolbar />
           <button
             onClick={() => signOut()}
-            className="p-2 rounded-xl hover:bg-destructive/10 hover:text-destructive transition"
+            className="p-1.5 rounded-xl hover:bg-destructive/10 hover:text-destructive transition text-muted-foreground"
             title="Sign out"
           >
             <LogOut className="w-4 h-4" />
@@ -133,7 +128,7 @@ export default function ChatSidebar() {
       </div>
 
       {/* Search Input */}
-      <div className="p-3">
+      <div className="p-3 space-y-2">
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -144,6 +139,17 @@ export default function ChatSidebar() {
             className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-muted/40 border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/30 transition text-foreground placeholder:text-muted-foreground/70"
           />
         </div>
+        {activeTab === "users" && (
+          <div className="flex items-center gap-1.5 px-1 py-0.5 animate-fadeIn">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[11px] font-semibold text-emerald-500">
+              {onlineUsers.length} users online
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Conversations / Users List */}
@@ -151,11 +157,6 @@ export default function ChatSidebar() {
         {activeTab === "chats" ? (
           isConversationsLoading ? (
             <SidebarSkeleton />
-          ) : conversationsError ? (
-            <ErrorSidebarState
-              message={conversationsError}
-              onRetry={getConversations}
-            />
           ) : filteredConversations.length === 0 ? (
             <EmptySidebarState
               icon={MessageSquare}
@@ -228,8 +229,6 @@ export default function ChatSidebar() {
           )
         ) : isUsersLoading ? (
           <SidebarSkeleton />
-        ) : usersError ? (
-          <ErrorSidebarState message={usersError} onRetry={getUsers} />
         ) : filteredUsers.length === 0 ? (
           <EmptySidebarState
             icon={Users}
@@ -311,27 +310,6 @@ function SidebarSkeleton() {
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-function ErrorSidebarState({ message, onRetry }) {
-  return (
-    <div className="flex flex-col items-center justify-center p-6 text-center h-56 space-y-3">
-      <div className="p-3 rounded-full bg-destructive/10 text-destructive">
-        <AlertTriangle className="w-6 h-6" />
-      </div>
-      <h4 className="text-sm font-semibold text-foreground">Backend Request Failed</h4>
-      <p className="text-xs text-muted-foreground max-w-xs">{message}</p>
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition shadow-xs"
-        >
-          <RotateCw className="w-3.5 h-3.5" />
-          <span>Retry request</span>
-        </button>
-      )}
     </div>
   );
 }

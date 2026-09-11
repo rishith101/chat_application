@@ -1,7 +1,7 @@
 import user from "../models/user.js";
 import Message from "../models/message.js";
 import {hasImageKitConfig,uploadChatMedia} from "../lib/imagekit.js"
-
+import {getReceiverSocketId,io} from "../lib/socket.js"
 export async function getUsersFromSidebar(req,res) {
     try{
         const loggedInUserId=req.user._id;
@@ -54,7 +54,7 @@ export async function getMessages(req,res){
                 {senderId:myId,receiverId:userToChatid},
                 {senderId:userToChatid,receiverId:myId},
             ]
-        }).sort({createdAt:-1});
+        }).sort({createdAt:1});
         res.status(200).json(message);
     }catch(error){
         console.error("error in converstion:",error.message);
@@ -83,9 +83,14 @@ export async function sendMessage(req,res){
             receiverId,
             text,
             image:imageUrl,
-            vedio:videoUrl,
+            video:videoUrl,
         })
         await newMessage.save();
+        const receiverSocketId=getReceiverSocketId(receiverId);
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("newMessage",newMessage);
+        }
+
         res.status(201).json(newMessage);
     }catch(error){
          console.error("error in converstion:",error.message);
