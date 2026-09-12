@@ -6,6 +6,7 @@ export async function connectDB() {
             throw new Error("mongouri is required");
         }
         const connection = await mongoose.connect(mongouri);
+        console.log("MongoDB connected:", connection.connection.host);
     } catch (error) {
         console.error("mongodb onnection error", error.message);
         process.exit(1);

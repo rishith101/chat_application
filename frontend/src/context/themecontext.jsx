@@ -1,29 +1,52 @@
-import { useEffect, useLayoutEffect, useState } from "react";
-import { DEFAULT_THEME_PRESET_ID } from "../data/herouiThemePresets";
-import { applyThemePresetToDocument, isValidThemePreset, ThemeContext } from "./theme";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
+import { DEFAULT_THEME_PRESET_ID, HERO_UI_THEME_PRESETS } from "../data/heroutheampresets.js";
 
-function getSystemTheme() {
-  if (typeof window === "undefined") return "light";
+export const ThemeContext = createContext({
+  theme: "dark",
+  setTheme: () => {},
+  toggleTheme: () => {},
+  themePreset: DEFAULT_THEME_PRESET_ID,
+  setThemePreset: () => {},
+});
+
+export function getSystemTheme() {
+  if (typeof window === "undefined") return "dark";
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function readStoredTheme() {
+export function readStoredTheme() {
+  if (typeof window === "undefined") return null;
   const theme = localStorage.getItem("theme");
   if (theme === "light" || theme === "dark") return theme;
-
   return null;
 }
 
-function applyDomTheme(theme) {
+export function applyDomTheme(theme) {
+  if (typeof window === "undefined") return;
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
   root.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
 }
 
-function readStoredThemePreset() {
+export function isValidThemePreset(presetId) {
+  return HERO_UI_THEME_PRESETS.some((p) => p.id === presetId);
+}
+
+export function applyThemePresetToDocument(presetId) {
+  if (typeof window === "undefined") return;
+  const root = document.documentElement;
+  if (presetId && presetId !== "default") {
+    root.setAttribute("data-theme-preset", presetId);
+  } else {
+    root.removeAttribute("data-theme-preset");
+  }
+}
+
+export function readStoredThemePreset() {
+  if (typeof window === "undefined") return DEFAULT_THEME_PRESET_ID;
   const themePreset = localStorage.getItem("theme-preset");
   if (themePreset && isValidThemePreset(themePreset)) return themePreset;
-
   return DEFAULT_THEME_PRESET_ID;
 }
 
@@ -31,17 +54,14 @@ export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => readStoredTheme() ?? getSystemTheme());
   const [themePreset, setThemePresetState] = useState(readStoredThemePreset);
 
-  // this applies light/dark mode
   useLayoutEffect(() => {
     applyDomTheme(theme);
   }, [theme]);
 
-  // this applies the theme preset, like sky, spotify, etc.
   useLayoutEffect(() => {
     applyThemePresetToDocument(themePreset);
   }, [themePreset]);
 
-  // this stores the theme and theme preset in local storage
   useEffect(() => {
     localStorage.setItem("theme", theme);
     localStorage.setItem("theme-preset", themePreset);
@@ -63,4 +83,12 @@ export function ThemeProvider({ children }) {
   const value = { theme, setTheme, toggleTheme, themePreset, setThemePreset };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
 }

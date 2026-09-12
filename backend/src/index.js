@@ -44,12 +44,23 @@ if (fs.existsSync(publicDir)) {
   });
 }
 
-server.listen(PORT, () => {
-  connectDB();
-  console.log("running on port. :",PORT);
-  if (process.env.NODE_ENV === "production")
-    job.start();
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    server.listen(PORT, () => {
+      console.log("running on port. :", PORT);
+
+      if (process.env.NODE_ENV === "production") {
+        job.start();
+      }
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 // node latest version  . no need to nodemon  wecan use --watch in script . so it autmaically restarts the index.js where there are any kind of changes 
 
