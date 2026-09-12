@@ -5,7 +5,6 @@ import { useChatStore } from "../../store/useChatStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useSelectedConversation, getInitials } from "../../hooks/useSelectedConversation";
 import { AppLogo } from "./AppLogo";
-import { ThemeControlToolbar } from "../ThemeControlToolbar";
 
 export function ChatSidebar() {
   const [tab, setTab] = useState("chats"); // "chats" | "users"
@@ -45,9 +44,8 @@ export function ChatSidebar() {
 
   return (
     <aside
-      className={`w-full lg:w-80 flex-shrink-0 flex flex-col border-r border-border/50 bg-card/40 backdrop-blur-md relative z-20 transition-all ${
-        !isLargeScreen && activeConversationId ? "hidden lg:flex" : "flex"
-      }`}
+      className={`w-full lg:w-80 flex-shrink-0 flex flex-col border-r border-border/50 bg-card/40 backdrop-blur-md relative z-20 transition-all ${!isLargeScreen && activeConversationId ? "hidden lg:flex" : "flex"
+        }`}
     >
       {/* Header with App Logo, Profile, and Global Toolbar */}
       <div className="p-3.5 border-b border-border/50 flex items-center justify-between gap-2">
@@ -64,18 +62,15 @@ export function ChatSidebar() {
           </div>
         </div>
 
-        {/* Global Theme & Sound Toolbar + Profile/Logout */}
-        <div className="flex items-center gap-1 shrink-0">
-          <ThemeControlToolbar compact={true} />
-          <button
-            type="button"
-            onClick={() => signOut()}
-            title="Sign Out"
-            className="p-1.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer"
-          >
-            <LogOut className="size-3.5" />
-          </button>
-        </div>
+        {/* Logout */}
+        <button
+          type="button"
+          onClick={() => signOut()}
+          title="Sign Out"
+          className="p-1.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer shrink-0"
+        >
+          <LogOut className="size-3.5" />
+        </button>
       </div>
 
       {/* Tabs */}
@@ -84,11 +79,10 @@ export function ChatSidebar() {
           <button
             type="button"
             onClick={() => setTab("chats")}
-            className={`flex items-center justify-center gap-2 py-1.5 rounded-lg transition cursor-pointer ${
-              tab === "chats"
+            className={`flex items-center justify-center gap-2 py-1.5 rounded-lg transition cursor-pointer ${tab === "chats"
                 ? "bg-background text-foreground shadow-xs font-bold"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             <MessageSquare className="size-3.5" />
             <span>Chats</span>
@@ -101,11 +95,10 @@ export function ChatSidebar() {
           <button
             type="button"
             onClick={() => setTab("users")}
-            className={`flex items-center justify-center gap-2 py-1.5 rounded-lg transition cursor-pointer ${
-              tab === "users"
+            className={`flex items-center justify-center gap-2 py-1.5 rounded-lg transition cursor-pointer ${tab === "users"
                 ? "bg-background text-foreground shadow-xs font-bold"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             <Users className="size-3.5" />
             <span>Contacts</span>
@@ -163,11 +156,10 @@ export function ChatSidebar() {
                   key={user._id}
                   type="button"
                   onClick={() => setActiveConversationId(user._id)}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition cursor-pointer ${
-                    isSelected
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition cursor-pointer ${isSelected
                       ? "bg-primary/15 text-primary border border-primary/30 shadow-xs"
                       : "hover:bg-muted/50 text-foreground"
-                  }`}
+                    }`}
                 >
                   {/* Avatar */}
                   <div className="relative shrink-0">
@@ -227,11 +219,10 @@ export function ChatSidebar() {
                   key={user._id}
                   type="button"
                   onClick={() => setActiveConversationId(user._id)}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition cursor-pointer ${
-                    isSelected
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition cursor-pointer ${isSelected
                       ? "bg-primary/15 text-primary border border-primary/30 shadow-xs"
                       : "hover:bg-muted/50 text-foreground"
-                  }`}
+                    }`}
                 >
                   {/* Avatar */}
                   <div className="relative shrink-0">
