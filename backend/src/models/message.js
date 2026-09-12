@@ -23,18 +23,10 @@ const messageSchema = new mongoose.Schema({
 
 }, { timestamps: true }
 );
-messageSchema.pre("validate", function (next) {
-
+messageSchema.pre("validate", function () {
     if (!this.text && !this.image && !this.video) {
-
-        next(new Error("Message must have text, image, or video"));
-
-    } else {
-
-        next();
-
+        throw new Error("Message must have text, image, or video");
     }
-
 });
 
 const Message = mongoose.model("Message", messageSchema);
